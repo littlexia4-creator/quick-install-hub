@@ -19,6 +19,16 @@ NEKO_USER_PASSWORD="${NEKO_USER_PASSWORD:-user}"
 NEKO_SCREEN="${NEKO_SCREEN:-1920*1080@60}"
 INSTALL_DIR="${INSTALL_DIR:-/opt/neko}"
 
+# ---------- Colors ----------
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+info()  { echo -e "${GREEN}[INFO]${NC}  $*"; }
+warn()  { echo -e "${YELLOW}[WARN]${NC}  $*"; }
+error() { echo -e "${RED}[ERROR]${NC} $*"; exit 1; }
+
 # ---------- Auto-detect hardware resources ----------
 TOTAL_MEM_MB=$(awk '/MemTotal/ {printf "%d", $2/1024}' /proc/meminfo)
 TOTAL_CPUS=$(nproc)
@@ -51,16 +61,6 @@ fi
 
 info "Detected: ${TOTAL_CPUS} CPUs, ${TOTAL_MEM_MB}MB RAM"
 info "Allocating: cpus=${NEKO_CPUS}, mem=${NEKO_MEM_LIMIT}, shm=${NEKO_SHM_SIZE}"
-
-# ---------- Colors ----------
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
-
-info()  { echo -e "${GREEN}[INFO]${NC}  $*"; }
-warn()  { echo -e "${YELLOW}[WARN]${NC}  $*"; }
-error() { echo -e "${RED}[ERROR]${NC} $*"; exit 1; }
 
 # ---------- Pre-flight checks ----------
 [[ "$(id -u)" -eq 0 ]] || error "This script must be run as root (or with sudo)."
@@ -96,8 +96,6 @@ fi
 info "Writing docker-compose.yml to ${INSTALL_DIR}..."
 
 cat > docker-compose.yml <<YAML
-version: '3.8'
-
 services:
   neko:
     image: ${NEKO_IMAGE}
