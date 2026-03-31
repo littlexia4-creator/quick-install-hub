@@ -11,13 +11,14 @@ set -euo pipefail
 NEKO_IMAGE="${NEKO_IMAGE:-m1k1o/neko:latest}"
 NEKO_BROWSER="${NEKO_BROWSER:-firefox}"
 NEKO_CONTAINER_NAME="${NEKO_CONTAINER_NAME:-neko-${NEKO_BROWSER}}"
-NEKO_HTTP_PORT="${NEKO_HTTP_PORT:-8080}"  
-NEKO_UDP_RANGE="${NEKO_UDP_RANGE:-52000-52100}"  # Changed from 52000-52100 to 52000-52100
+NEKO_HTTP_PORT="${NEKO_HTTP_PORT:-8080}"
 NEKO_UDP_RANGE="${NEKO_UDP_RANGE:-52000-52100}"
 NEKO_ADMIN_PASSWORD="${NEKO_ADMIN_PASSWORD:-admin}"
 NEKO_USER_PASSWORD="${NEKO_USER_PASSWORD:-user}"
 NEKO_SCREEN="${NEKO_SCREEN:-1920*1080@60}"
 INSTALL_DIR="${INSTALL_DIR:-/opt/neko}"
+SERVER_IP="${SERVER_IP:-$(curl -sf ifconfig.me 2>/dev/null || echo "127.0.0.1")}"
+        
 
 # ---------- Colors ----------
 RED='\033[0;31m'
@@ -156,7 +157,6 @@ fi
 # fi
 
 # ---------- Done ----------
-SERVER_IP=$(hostname -I | awk '{print $1}')
 echo ""
 info "====================================="
 info "  m1k1o/neko is running!"

@@ -24,6 +24,13 @@ Deploy [m1k1o/neko](https://github.com/m1k1o/neko) — a self-hosted virtual bro
 curl -fsSL https://raw.githubusercontent.com/littlexia4-creator/quick-install-hub/refs/heads/main/neko-setup.sh | bash
 ```
 
+Custom ip:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/littlexia4-creator/quick-install-hub/refs/heads/main/neko-setup.sh \
+  | SERVER_IP=38.165.43.231 bash
+```
+
 Custom browser and passwords:
 
 ```bash
