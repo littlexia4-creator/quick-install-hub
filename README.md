@@ -43,3 +43,25 @@ curl -fsSL https://raw.githubusercontent.com/littlexia4-creator/quick-install-hu
 ```bash
 curl -fsSL https://openclaw.ai/install.sh | bash
 ```
+
+## Install NATIVELINKE Based ON Python3 Image
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/littlexia4-creator/DOCKERFILES/refs/heads/main/nativelink-ubuntu/install.sh | bash
+```
+
+## Deploy NATIVELINKE Server (CAS + Scheduler)
+On the main Linux server:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/littlexia4-creator/nativelink-deploy/main/install.sh | bash -s -- server
+```
+
+## Deploy NATIVELINKE Worker
+On any additional Linux server:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/littlexia4-creator/nativelink-deploy/main/install.sh | bash -s -- worker <SERVER_IP>
+```
+
+Replace <SERVER_IP> with the IP of the server running CAS + Scheduler.
