@@ -13,7 +13,7 @@ curl -fsSL https://raw.githubusercontent.com/littlexia4-creator/DOCKERFILES/refs
 Install Docker CE with Docker Compose on Ubuntu:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/littlexia4-creator/quick-install-hub/refs/heads/main/ubuntu-docker-install-start.sh | bash
+curl -fsSL https://get.docker.com | bash
 ```
 
 ## Neko (Remote Browser)
@@ -47,7 +47,16 @@ curl -fsSL https://openclaw.ai/install.sh | bash
 ## Install NATIVELINKE Based ON Python3 Image
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/littlexia4-creator/DOCKERFILES/refs/heads/main/nativelink-ubuntu/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/littlexia4-creator/DOCKERFILES/refs/heads/main/nativelink/nativelink-ubuntu/install.sh  | bash
+```
+```bash
+curl -fsSL https://raw.githubusercontent.com/littlexia4-creator/DOCKERFILES/refs/heads/main/nativelink/nativelink-python/install.sh  | bash
+```
+```bash
+curl -fsSL https://raw.githubusercontent.com/littlexia4-creator/DOCKERFILES/refs/heads/main/nativelink/nativelink-gcc/install.sh  | bash
+```
+```bash
+curl -fsSL https://raw.githubusercontent.com/littlexia4-creator/DOCKERFILES/refs/heads/main/nativelink/nativelink-osxcross-ubuntu/install.sh  | bash
 ```
 
 ## Deploy NATIVELINKE Server (CAS + Scheduler)
