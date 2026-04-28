@@ -38,6 +38,28 @@ curl -fsSL https://raw.githubusercontent.com/littlexia4-creator/quick-install-hu
   | NEKO_BROWSER=chromium NEKO_ADMIN_PASSWORD=secret NEKO_USER_PASSWORD=guest bash
 ```
 
+## Mihomo (Clash-compatible Proxy)
+
+Deploy [mihomo](https://github.com/MetaCubeX/mihomo) + [metacubexd](https://github.com/MetaCubeX/metacubexd) dashboard via Docker. Pass a local config file or subscription URL; saved as `config.yaml`.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/littlexia4-creator/quick-install-hub/refs/heads/main/mihomo-setup.sh \
+  | bash -s -- https://example.com/sub.yaml
+```
+
+With dashboard backend IP (sets `DEFAULT_BACKEND_URL` on metacubexd):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/littlexia4-creator/quick-install-hub/refs/heads/main/mihomo-setup.sh \
+  | bash -s -- https://example.com/sub.yaml --server-ip 38.165.43.231
+```
+
+Local config file:
+
+```bash
+./mihomo-setup.sh ./my-config.yaml --server-ip 38.165.43.231
+```
+
 ## OpenClaw
 
 ```bash
