@@ -1,0 +1,18 @@
+{
+    "registry-mirrors":[
+        "https://docker.1panel.live/",
+        "https://proxy.vvvv.ee",
+        "https://dockerproxy.net",
+        "https://dockerproxy.com",
+        "https://hub.rat.dev",
+        "https://docker-0.unsee.tech",
+        "https://docker.1ms.run",
+        "https://dockertest.jsdelivr.fyi",
+        "https://dockercf.jsdelivr.fyi",
+        "https://docker.jsdelivr.fyi",
+        "https://docker-cf.registry.cyou"
+    ],
+    "insecure-registries": [
+        "docker.m.daocloud.io"
+    ]
+}
