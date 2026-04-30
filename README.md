@@ -60,6 +60,27 @@ Local config file:
 ./mihomo-setup.sh ./my-config.yaml --server-ip 38.165.43.231
 ```
 
+## Docker Registry Mirrors
+
+Merge `accelerating-docker-hub.json` into the Docker daemon config to add registry mirrors. Auto-detects target path (`/etc/docker/daemon.json` on Linux, `~/.docker/config.json` on macOS), backs up existing config, merges `registry-mirrors` / `insecure-registries` lists without duplicates, then restarts Docker.
+
+```bash
+curl -fsSL https://cdn.jsdelivr.net/gh/littlexia4-creator/quick-install-hub@main/append-docker-config.sh | sudo bash 
+```
+
+Download first then execute
+
+```bash
+wget https://cdn.jsdelivr.net/gh/littlexia4-creator/quick-install-hub@main/append-docker-config.sh
+sudo sh ./append-docker-config.sh
+```
+
+Skip the auto-restart:
+
+```bash
+sudo SKIP_RESTART=1 ./append-docker-config.sh
+```
+
 ## OpenClaw
 
 ```bash

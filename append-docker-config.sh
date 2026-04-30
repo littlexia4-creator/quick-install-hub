@@ -1,7 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_PATH="${BASH_SOURCE[0]:-}"
+
+# Bootstrap when piped via `curl ... | bash` — no script file on disk and
+# accelerating-docker-hub.json missing alongside it. Download both from the
+# same source URL and re-exec the on-disk copy.
+if [[ -z "$SCRIPT_PATH" || ! -f "$SCRIPT_PATH" ]]; then
+    REPO_BASE="${REPO_BASE:-https://cdn.jsdelivr.net/gh/littlexia4-creator/quick-install-hub@main}"
+    bootstrap_dir="$(mktemp -d)"
+    curl -fsSL "${REPO_BASE}/append-docker-daemon-config.sh" -o "${bootstrap_dir}/append-docker-daemon-config.sh"
+    curl -fsSL "${REPO_BASE}/accelerating-docker-hub.json" -o "${bootstrap_dir}/accelerating-docker-hub.json"
+    chmod +x "${bootstrap_dir}/append-docker-daemon-config.sh"
+    exec bash "${bootstrap_dir}/append-docker-daemon-config.sh" "$@"
+fi
+
+SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
 CONFIG_SOURCE="${SCRIPT_DIR}/accelerating-docker-hub.json"
 TARGET_PATH="${1:-}"
 
@@ -44,8 +58,15 @@ if [[ -z "$TARGET_PATH" ]]; then
 fi
 
 if [[ ! -f "$CONFIG_SOURCE" ]]; then
-    echo "Config source not found: $CONFIG_SOURCE" >&2
-    exit 1
+    REPO_BASE="${REPO_BASE:-https://cdn.jsdelivr.net/gh/littlexia4-creator/quick-install-hub@main}"
+    echo "fetching from $REPO_BASE ..." >&2
+    fetched_json="$(mktemp)"
+    if ! curl -fsSL "${REPO_BASE}/accelerating-docker-hub.json" -o "$fetched_json"; then
+        rm -f "$fetched_json"
+        echo "Failed to download accelerating-docker-hub.json from $REPO_BASE" >&2
+        exit 1
+    fi
+    CONFIG_SOURCE="$fetched_json"
 fi
 
 if [[ "$TARGET_PATH" == "/etc/"* && "${EUID:-$(id -u)}" -ne 0 ]]; then
@@ -65,6 +86,7 @@ tmp_path="$(mktemp)"
 
 cleanup() {
     rm -f "$tmp_path"
+    [[ -n "${fetched_json:-}" ]] && rm -f "$fetched_json"
 }
 trap cleanup EXIT
 
@@ -81,8 +103,10 @@ tmp_path = Path(sys.argv[3])
 def load_json(path):
     if not path.exists():
         return {}
-    with path.open("r", encoding="utf-8") as file:
-        return json.load(file)
+    text = path.read_text(encoding="utf-8").strip()
+    if not text:
+        return {}
+    return json.loads(text)
 
 
 def merge_unique(existing, incoming):
@@ -130,3 +154,46 @@ if [[ -n "$backup_path" ]]; then
 else
     echo "Created $TARGET_PATH"
 fi
+
+if [[ "${SKIP_RESTART:-0}" == "1" ]]; then
+    echo "SKIP_RESTART=1 set; not restarting Docker."
+    exit 0
+fi
+
+restart_docker_linux() {
+    if command -v systemctl >/dev/null 2>&1; then
+        echo "Restarting Docker via systemctl..."
+        systemctl restart docker
+        return 0
+    fi
+    if command -v service >/dev/null 2>&1; then
+        echo "Restarting Docker via service..."
+        service docker restart
+        return 0
+    fi
+    echo "No systemctl or service found; restart Docker manually." >&2
+    return 1
+}
+
+restart_docker_darwin() {
+    if ! command -v osascript >/dev/null 2>&1; then
+        echo "osascript not found; restart Docker Desktop manually." >&2
+        return 1
+    fi
+    echo "Restarting Docker Desktop..."
+    osascript -e 'quit app "Docker"' >/dev/null 2>&1 || true
+    sleep 2
+    open -a Docker
+}
+
+case "$(uname -s)" in
+    Linux)
+        restart_docker_linux
+        ;;
+    Darwin)
+        restart_docker_darwin
+        ;;
+    *)
+        echo "Unknown platform; restart Docker manually." >&2
+        ;;
+esac
