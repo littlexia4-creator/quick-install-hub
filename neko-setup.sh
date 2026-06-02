@@ -18,7 +18,13 @@ NEKO_USER_PASSWORD="${NEKO_USER_PASSWORD:-user}"
 NEKO_SCREEN="${NEKO_SCREEN:-1920*1080@60}"
 INSTALL_DIR="${INSTALL_DIR:-/opt/neko}"
 SERVER_IP="${SERVER_IP:-$(curl -sf ifconfig.me 2>/dev/null || echo "127.0.0.1")}"
-        
+# WebRTC reachability: advertise this IP as the ICE host candidate and run in
+# ICE-lite mode so the server never relies on STUN to discover its own address.
+# Required behind NAT / on LANs / restrictive networks where STUN is blocked or
+# mangled (otherwise the UI loads but the video stream hangs on a black screen).
+NEKO_NAT1TO1="${NEKO_NAT1TO1:-$SERVER_IP}"
+NEKO_ICELITE="${NEKO_ICELITE:-true}"
+
 
 # ---------- Colors ----------
 RED='\033[0;31m'
@@ -117,7 +123,15 @@ services:
       - NEKO_USER_PASSWORD=${NEKO_USER_PASSWORD}
       - NEKO_ROOM_NAME=${NEKO_BROWSER}Room
       - NEKO_SCREEN=${NEKO_SCREEN}
+      # --- WebRTC: advertise reachable IP, ICE-lite (no STUN dependency) ---
+      # legacy (v2) env names
       - NEKO_EPR=${NEKO_UDP_RANGE}
+      - NEKO_NAT1TO1=${NEKO_NAT1TO1}
+      - NEKO_ICELITE=${NEKO_ICELITE}
+      # structured (v3) env names
+      - NEKO_WEBRTC_EPR=${NEKO_UDP_RANGE}
+      - NEKO_WEBRTC_NAT1TO1=${NEKO_NAT1TO1}
+      - NEKO_WEBRTC_ICELITE=${NEKO_ICELITE}
 
     volumes:
       - neko-data:/home/neko/.mozilla
@@ -165,5 +179,7 @@ info "  URL:            http://${SERVER_IP}:${NEKO_HTTP_PORT}"
 info "  Admin password: ${NEKO_ADMIN_PASSWORD}"
 info "  User password:  ${NEKO_USER_PASSWORD}"
 info "  Install dir:    ${INSTALL_DIR}"
+info "  WebRTC NAT1to1: ${NEKO_NAT1TO1} (icelite=${NEKO_ICELITE})"
+info "  WebRTC UDP:     ${NEKO_UDP_RANGE}/udp"
 info "====================================="
 echo ""
