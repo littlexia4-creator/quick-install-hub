@@ -38,6 +38,23 @@ curl -fsSL https://raw.githubusercontent.com/littlexia4-creator/quick-install-hu
   | NEKO_BROWSER=chromium NEKO_ADMIN_PASSWORD=secret NEKO_USER_PASSWORD=guest bash
 ```
 
+Route the browser through a proxy (e.g. a [Mihomo](#mihomo-clash-compatible-proxy) mixed-port). The setting is stored in a host-mounted Firefox policies file, so it **survives container restart/recreate**, and a `neko-proxy` toggle command is installed:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/littlexia4-creator/quick-install-hub/refs/heads/main/neko-setup.sh \
+  | NEKO_PROXY=11.160.226.174:7890 bash
+```
+
+Enable/disable at runtime:
+
+```bash
+sudo neko-proxy on       # route browser through the proxy
+sudo neko-proxy off      # direct, no proxy
+sudo neko-proxy status   # show current state
+```
+
+> Proxy auto-config currently supports `NEKO_BROWSER=firefox`. Customize the no-proxy list with `NEKO_PROXY_BYPASS` (default: `localhost, 127.0.0.1, <server-ip>`).
+
 ## Mihomo (Clash-compatible Proxy)
 
 Deploy [mihomo](https://github.com/MetaCubeX/mihomo) + [metacubexd](https://github.com/MetaCubeX/metacubexd) dashboard via Docker. Pass a local config file or subscription URL; saved as `config.yaml`.
