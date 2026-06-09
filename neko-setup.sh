@@ -8,8 +8,8 @@ set -euo pipefail
 # ============================================================
 
 # ---------- Default configuration (override via env vars) ----------
-NEKO_IMAGE="${NEKO_IMAGE:-m1k1o/neko:latest}"
-NEKO_BROWSER="${NEKO_BROWSER:-firefox}"
+NEKO_IMAGE="${NEKO_IMAGE:-m1k1o/neko:google-chrome}"
+NEKO_BROWSER="${NEKO_BROWSER:-chrome}"
 NEKO_CONTAINER_NAME="${NEKO_CONTAINER_NAME:-neko-${NEKO_BROWSER}}"
 NEKO_HTTP_PORT="${NEKO_HTTP_PORT:-8080}"
 NEKO_UDP_RANGE="${NEKO_UDP_RANGE:-52000-52100}"
@@ -108,9 +108,19 @@ if docker ps -a --format '{{.Names}}' | grep -qw "${NEKO_CONTAINER_NAME}"; then
     ${COMPOSE_CMD} down 2>/dev/null || docker rm -f "${NEKO_CONTAINER_NAME}" 2>/dev/null || true
 fi
 
+# ---------- Resolve browser profile dir (persisted via neko-data volume) ----------
+# Each browser stores its profile in a different path; mount the data volume at
+# the correct one so settings/cookies/logins survive container recreate.
+case "$NEKO_BROWSER" in
+    firefox)              NEKO_PROFILE_DIR="/home/neko/.mozilla" ;;
+    chrome|google-chrome) NEKO_PROFILE_DIR="/home/neko/.config/google-chrome" ;;
+    chromium)             NEKO_PROFILE_DIR="/home/neko/.config/chromium" ;;
+    *)                    NEKO_PROFILE_DIR="/home/neko/.config/${NEKO_BROWSER}" ;;
+esac
+
 # ---------- Optional: prepare browser proxy (firefox) ----------
 # Base volumes; a proxy policy mount is prepended when NEKO_PROXY is set.
-NEKO_VOLUMES="      - neko-data:/home/neko/.mozilla
+NEKO_VOLUMES="      - neko-data:${NEKO_PROFILE_DIR}
       - neko-recordings:/var/lib/neko/recordings"
 
 if [[ -n "$NEKO_PROXY" ]]; then
