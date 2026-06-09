@@ -223,6 +223,28 @@ if [[ "${STATE}" != "running" ]]; then
     error "Container failed to start. Check logs: docker logs ${NEKO_CONTAINER_NAME}"
 fi
 
+# ---------- Fix profile-volume ownership (CRITICAL for chrome/chromium) ----------
+# A freshly-created named volume is owned by root, but the browser runs as the
+# unprivileged 'neko' user (uid 1000). When the profile dir does not pre-exist in
+# the image (chrome/chromium create it only at runtime), the browser cannot write
+# its profile lock (SingletonLock) and aborts on launch -> black screen, even
+# though the container reports "healthy" (the healthcheck probes the neko server,
+# not the browser). chown the mounted profile dir to neko, then restart so the
+# browser starts cleanly against a writable profile. Harmless for firefox (whose
+# .mozilla dir already belongs to neko).
+NEKO_UID="${NEKO_UID:-1000}"
+info "Ensuring profile dir ${NEKO_PROFILE_DIR} is writable by neko (uid ${NEKO_UID})..."
+if docker exec -u 0 "${NEKO_CONTAINER_NAME}" chown -R "${NEKO_UID}:${NEKO_UID}" "${NEKO_PROFILE_DIR}" 2>/dev/null; then
+    docker restart "${NEKO_CONTAINER_NAME}" >/dev/null
+    for i in $(seq 1 10); do
+        [[ "$(docker inspect --format='{{.State.Status}}' "${NEKO_CONTAINER_NAME}" 2>/dev/null)" == "running" ]] && break
+        sleep 1
+    done
+    info "Profile dir ownership fixed; container restarted."
+else
+    warn "Could not chown ${NEKO_PROFILE_DIR}; browser may fail to start (black screen)."
+fi
+
 # ---------- Install proxy toggle command (when proxy configured) ----------
 if [[ -n "$NEKO_PROXY" ]]; then
     info "Installing neko-proxy toggle -> /usr/local/bin/neko-proxy"
